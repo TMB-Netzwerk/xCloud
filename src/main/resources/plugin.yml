@@ -1,0 +1,11 @@
+name: xCloud
+author: XenoDEV
+version: '1.2-Snapshot'
+
+main: de.xenodev.xCloud
+
+commands:
+  top:
+    description: Schaue dir die Top 3 Spieler an
+  daily:
+    description: Hole dir tägliche Belohnungen ab
