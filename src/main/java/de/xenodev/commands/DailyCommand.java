@@ -1,8 +1,6 @@
 package de.xenodev.commands;
 
-import de.xenodev.mysql.CoinAPI;
-import de.xenodev.mysql.RewardAPI;
-import de.xenodev.mysql.TicketAPI;
+import de.xenodev.mysql.PlayersAPI;
 import de.xenodev.xCloud;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -19,22 +17,22 @@ public class DailyCommand extends Command {
         if(sender instanceof ProxiedPlayer){
             ProxiedPlayer player = (ProxiedPlayer)sender;
 
-            if(!RewardAPI.allowReward(player.getUniqueId())){
+            if(!PlayersAPI.checkReward(player.getUniqueId())){
                 player.sendMessage(xCloud.getPrefix() + "§7Du hast deine Daily-Reward bereits abgeholt");
                 long current = System.currentTimeMillis();
-                long time = RewardAPI.getTime(player.getUniqueId());
+                long time = PlayersAPI.getRewardTime(player.getUniqueId());
                 long now = time - current;
-                player.sendMessage(xCloud.getPrefix() + "§7Verbleibende Zeit: " + RewardAPI.remainingTime(now));
+                player.sendMessage(xCloud.getPrefix() + "§7Verbleibende Zeit: " + PlayersAPI.remainingReward(now));
                 return;
             }
             Integer reward = 1000;
-            Integer bonus = 50*RewardAPI.getStreak(player.getUniqueId());
+            Integer bonus = 50*PlayersAPI.getRewardStreak(player.getUniqueId());
             Integer amount = reward + bonus;
-            CoinAPI.addCoins(player.getUniqueId(), amount);
-            TicketAPI.addTickets(player.getUniqueId(), 1);
-            RewardAPI.setTime(player.getUniqueId());
-            RewardAPI.addStreak(player.getUniqueId(), 1);
-            player.sendMessage(xCloud.getPrefix() + "§7Du hast §e" + amount + " §7Coins und §21 Ticket §7erhalten §8[§7Streak: §c" + RewardAPI.getStreak(player.getUniqueId()) + "§8]");
+            PlayersAPI.addCoins(player.getUniqueId(), amount);
+            PlayersAPI.addTickets(player.getUniqueId(), 1);
+            PlayersAPI.setRewardTime(player.getUniqueId());
+            PlayersAPI.addRewardStreak(player.getUniqueId(), 1);
+            player.sendMessage(xCloud.getPrefix() + "§7Du hast §e" + amount + " §7Coins und §21 Ticket §7erhalten §8[§7Streak: §c" + PlayersAPI.getRewardStreak(player.getUniqueId()) + "§8]");
         }
     }
 }

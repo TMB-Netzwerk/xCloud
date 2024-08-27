@@ -2,9 +2,8 @@ package de.xenodev;
 
 import de.xenodev.commands.DailyCommand;
 import de.xenodev.commands.TOPCommand;
-import de.xenodev.mysql.CoinAPI;
 import de.xenodev.mysql.MySQL;
-import de.xenodev.mysql.TimeAPI;
+import de.xenodev.mysql.PlayersAPI;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
@@ -75,22 +74,10 @@ public class xCloud extends Plugin {
     private void checkMySQL(){
         mySQL = new MySQL(config.getString("MySQL.Host"), config.getString("MySQL.Database"), config.getString("MySQL.Username"), config.getString("MySQL.Password"));
         try (Connection connection = getMySQL().dataSource.getConnection()) {
-            PreparedStatement preparedStatement1 = connection.prepareStatement("CREATE TABLE IF NOT EXISTS Time(UUID VARCHAR(100),HOURS BIGINT,MINUTES INT,SECONDS INT)");
-            PreparedStatement preparedStatement2 = connection.prepareStatement("CREATE TABLE IF NOT EXISTS Coins(UUID VARCHAR(100),COINS BIGINT)");
-            PreparedStatement preparedStatement3 = connection.prepareStatement("CREATE TABLE IF NOT EXISTS Bytes(UUID VARCHAR(100),BYTES BIGINT)");
-            PreparedStatement preparedStatement4 = connection.prepareStatement("CREATE TABLE IF NOT EXISTS Tickets(UUID VARCHAR(100),TICKETS BIGINT)");
-            PreparedStatement preparedStatement5 = connection.prepareStatement("CREATE TABLE IF NOT EXISTS Reward(UUID VARCHAR(100),TIME BIGINT, STREAK BIGINT)");
+            PreparedStatement preparedStatement1 = connection.prepareStatement("CREATE TABLE IF NOT EXISTS Players(UUID VARCHAR(100),TIME BIGINT,COINS BIGINT,BYTES BIGINT,TICKETS BIGINT,FIRST_JOIN VARCHAR(20),JOINS BIGINT,REWARD_TIME BIGINT,REWARD_STREAK BIGINT,COLOR VARCHAR(25))");
             preparedStatement1.execute();
-            preparedStatement2.execute();
-            preparedStatement3.execute();
-            preparedStatement4.execute();
-            preparedStatement5.execute();
 
             preparedStatement1.close();
-            preparedStatement2.close();
-            preparedStatement3.close();
-            preparedStatement4.close();
-            preparedStatement5.close();
         }catch(SQLException ex){
             ex.printStackTrace();
         }
@@ -101,18 +88,11 @@ public class xCloud extends Plugin {
             @Override
             public void run() {
                 for (ProxiedPlayer proxiedPlayers : ProxyServer.getInstance().getPlayers()) {
-                    TimeAPI.addSeconds(proxiedPlayers.getUniqueId(), 1);
-                    if (TimeAPI.getSeconds(proxiedPlayers.getUniqueId()) == 60) {
-                        TimeAPI.setSeconds(proxiedPlayers.getUniqueId(), 0);
-                        TimeAPI.addMinutes(proxiedPlayers.getUniqueId(), 1);
-                    }
-                    if (TimeAPI.getMinutes(proxiedPlayers.getUniqueId()) == 10 && TimeAPI.getSeconds(proxiedPlayers.getUniqueId()) == 0) {
-                        CoinAPI.addCoins(proxiedPlayers.getUniqueId(), new Random().nextInt(500, 1000));
-                    }
-                    if (TimeAPI.getMinutes(proxiedPlayers.getUniqueId()) == 60) {
-                        TimeAPI.setMinutes(proxiedPlayers.getUniqueId(), 0);
-                        TimeAPI.addHours(proxiedPlayers.getUniqueId(), 1);
-                        CoinAPI.addCoins(proxiedPlayers.getUniqueId(), 2500);
+                    PlayersAPI.addTime(proxiedPlayers.getUniqueId());
+                    if(PlayersAPI.checkTimeReward(proxiedPlayers.getUniqueId()) == 1){
+                        PlayersAPI.addCoins(proxiedPlayers.getUniqueId(), new Random().nextInt(500, 1000));
+                    }else if(PlayersAPI.checkTimeReward(proxiedPlayers.getUniqueId()) == 2){
+                        PlayersAPI.addCoins(proxiedPlayers.getUniqueId(), 2500);
                         proxiedPlayers.sendMessage(xCloud.getPrefix() + "§7Du hast §e" + "2500" + " §7Coins fürs Spielen erhalten");
                     }
                 }

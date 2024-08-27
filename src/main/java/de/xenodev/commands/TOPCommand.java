@@ -1,5 +1,6 @@
 package de.xenodev.commands;
 
+import de.xenodev.mysql.PlayersAPI;
 import de.xenodev.utils.NameFetcher;
 import de.xenodev.xCloud;
 import net.md_5.bungee.api.ChatColor;
@@ -8,6 +9,8 @@ import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.TabExecutor;
 
 import java.awt.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -23,44 +26,48 @@ public class TOPCommand extends Command implements TabExecutor {
     public void execute(CommandSender sender, String[] args) {
         if(args.length == 1){
             if(args[0].equalsIgnoreCase("time")){
-                ResultSet resultSet = xCloud.getMySQL().query("SELECT * FROM Time ORDER BY HOURS DESC LIMIT 3");
-                Integer checkPlate = 0;
+                try (Connection connection = xCloud.getMySQL().dataSource.getConnection()) {
+                    PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM Players ORDER BY TIME DESC LIMIT 3");
 
-                sender.sendMessage("");
-                sender.sendMessage("§8----------» §a§lTop 3 Activest Player §8«----------");
-                sender.sendMessage("");
+                    ResultSet resultSet = preparedStatement.executeQuery();
+                    Integer checkPlate = 0;
 
-                try{
-                    while(resultSet.next()){
+                    sender.sendMessage("");
+                    sender.sendMessage("§8----------» §a§lTop 3 Most Time §8«----------");
+                    sender.sendMessage("");
+
+                    while(resultSet.next()) {
                         checkPlate++;
-                        Integer hours = resultSet.getInt("HOURS");
+                        String time = PlayersAPI.formateTimeByTime(resultSet.getInt("TIME"));
                         String playerName = NameFetcher.getName(UUID.fromString(resultSet.getString("UUID")));
 
-                        if(checkPlate == 1){
-                            sender.sendMessage(ChatColor.of(new Color(255, 215, 0)) + "§l1. §a" + playerName.toUpperCase() + "§7: §e" + hours + " §7Hours");
-                        }else if(checkPlate == 2){
-                            sender.sendMessage(ChatColor.of(new Color(192, 192, 192)) + "§l2. §a" + playerName.toUpperCase() + "§7: §e" + hours + " §7Hours");
-                        }else if (checkPlate == 3){
-                            sender.sendMessage(ChatColor.of(new Color(205, 127, 50)) + "§l3. §a" + playerName.toUpperCase() + "§7: §e" + hours + " §7Hours");
+                        if (checkPlate == 1) {
+                            sender.sendMessage(ChatColor.of(new Color(255, 215, 0)) + "§l1. §a" + playerName.toUpperCase() + "§7: §e" + time + " §7Hours");
+                        } else if (checkPlate == 2) {
+                            sender.sendMessage(ChatColor.of(new Color(192, 192, 192)) + "§l2. §a" + playerName.toUpperCase() + "§7: §e" + time + " §7Hours");
+                        } else if (checkPlate == 3) {
+                            sender.sendMessage(ChatColor.of(new Color(205, 127, 50)) + "§l3. §a" + playerName.toUpperCase() + "§7: §e" + time + " §7Hours");
                         }
                     }
-                }catch (SQLException e){
-                    e.printStackTrace();
+
+                    sender.sendMessage("");
+                    sender.sendMessage("§8----------» §a§lTop 3 Most Time §8«----------");
+                    sender.sendMessage("");
+                }catch(SQLException ex){
+                    ex.printStackTrace();
                 }
-
-                sender.sendMessage("");
-                sender.sendMessage("§8----------» §a§lTop 3 Activest Player §8«----------");
-                sender.sendMessage("");
             }else if(args[0].equalsIgnoreCase("bytes")){
-                ResultSet resultSet = xCloud.getMySQL().query("SELECT * FROM Bytes ORDER BY BYTES DESC LIMIT 3");
-                Integer checkPlate = 0;
+                try (Connection connection = xCloud.getMySQL().dataSource.getConnection()) {
+                    PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM Players ORDER BY BYTES DESC LIMIT 3");
 
-                sender.sendMessage("");
-                sender.sendMessage("§8----------» §a§lTop 3 Most Bytes §8«----------");
-                sender.sendMessage("");
+                    ResultSet resultSet = preparedStatement.executeQuery();
+                    Integer checkPlate = 0;
 
-                try{
-                    while(resultSet.next()){
+                    sender.sendMessage("");
+                    sender.sendMessage("§8----------» §a§lTop 3 Most Bytes §8«----------");
+                    sender.sendMessage("");
+
+                    while(resultSet.next()) {
                         checkPlate++;
                         Integer bytes = resultSet.getInt("BYTES");
                         String playerName = NameFetcher.getName(UUID.fromString(resultSet.getString("UUID")));
@@ -73,23 +80,25 @@ public class TOPCommand extends Command implements TabExecutor {
                             sender.sendMessage(ChatColor.of(new Color(205, 127, 50)) + "§l3. §a" + playerName.toUpperCase() + "§7: §e" + bytes + " §7Bytes");
                         }
                     }
-                }catch (SQLException e){
-                    e.printStackTrace();
+
+                    sender.sendMessage("");
+                    sender.sendMessage("§8----------» §a§lTop 3 Most Bytes §8«----------");
+                    sender.sendMessage("");
+                }catch(SQLException ex){
+                    ex.printStackTrace();
                 }
-
-                sender.sendMessage("");
-                sender.sendMessage("§8----------» §a§lTop 3 Most Bytes §8«----------");
-                sender.sendMessage("");
             }else if(args[0].equalsIgnoreCase("coins")){
-                ResultSet resultSet = xCloud.getMySQL().query("SELECT * FROM Coins ORDER BY COINS DESC LIMIT 3");
-                Integer checkPlate = 0;
+                try (Connection connection = xCloud.getMySQL().dataSource.getConnection()) {
+                    PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM Players ORDER BY COINS DESC LIMIT 3");
 
-                sender.sendMessage("");
-                sender.sendMessage("§8----------» §a§lTop 3 Most Coins §8«----------");
-                sender.sendMessage("");
+                    ResultSet resultSet = preparedStatement.executeQuery();
+                    Integer checkPlate = 0;
 
-                try{
-                    while(resultSet.next()){
+                    sender.sendMessage("");
+                    sender.sendMessage("§8----------» §a§lTop 3 Most Coins §8«----------");
+                    sender.sendMessage("");
+
+                    while(resultSet.next()) {
                         checkPlate++;
                         Integer coins = resultSet.getInt("COINS");
                         String playerName = NameFetcher.getName(UUID.fromString(resultSet.getString("UUID")));
@@ -102,13 +111,13 @@ public class TOPCommand extends Command implements TabExecutor {
                             sender.sendMessage(ChatColor.of(new Color(205, 127, 50)) + "§l3. §a" + playerName.toUpperCase() + "§7: §e" + coins + " §7Coins");
                         }
                     }
-                }catch (SQLException e){
-                    e.printStackTrace();
-                }
 
-                sender.sendMessage("");
-                sender.sendMessage("§8----------» §a§lTop 3 Most Coins §8«----------");
-                sender.sendMessage("");
+                    sender.sendMessage("");
+                    sender.sendMessage("§8----------» §a§lTop 3 Most Coins §8«----------");
+                    sender.sendMessage("");
+                }catch(SQLException ex){
+                    ex.printStackTrace();
+                }
             }
         }else{
             sender.sendMessage("§cEs gibt keine weiteren Argumente!");
